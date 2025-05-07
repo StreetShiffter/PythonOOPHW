@@ -1,5 +1,4 @@
 import json
-from typing import Any, Dict, List
 from config import FILE_JSON
 
 
@@ -70,20 +69,20 @@ def restract_object(path_file: str) -> list[Category]:
         return categories
 
 
-# if __name__ == "__main__":
-#     # 1. Загружаем данные
-#     categories = restract_object(FILE_JSON)  # Получаем список категорий
-#
-#     # 2. Выводим общую информацию
-#     print(f"\nВсего категорий: {Category.category_count}")
-#     print(f"Всего товаров: {Category.product_count}")
-#
-#     # 3. Выводим подробную информацию по каждой категории
-#     for category in categories:  # Теперь categories определена
-#         print(f"\nКатегория: {category.name}")
-#         print(f"Описание: {category.description}")
-#         print(f"Количество товаров: {len(category.products)}")
-#
-#         # Выводим все товары в категории
-#         for product in category.products:
-#             print(f"  {product}")
+if __name__ == "__main__":
+    # 1. Загружаем данные
+    categories = restract_object(FILE_JSON)  # Получаем список категорий
+
+    # 2. Выводим общую информацию
+    print(f"\nВсего категорий: {Category.category_count}")
+    print(f"Всего товаров: {Category.product_count}")
+
+    # 3. Выводим подробную информацию по каждой категории
+    for category in categories:  # Теперь categories определена
+        print(f"\nКатегория: {category.name}")
+        print(f"Описание: {category.description}")
+        print(f"Количество товаров: {len(category.products)}")
+
+        # Выводим все товары в категории
+        for product in category.products:
+            print(f"  {product}")

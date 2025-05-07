@@ -1,5 +1,3 @@
-from typing import Any
-
 from src.class_module import Category, Product
 
 
@@ -26,3 +24,11 @@ def test_category_correct(category_item: Category) -> None:
     assert len(category_item.products) == 1  # Если в фикстуре 1 товар
     assert Category.category_count == 1  # Проверяем, что счетчик увеличился
     assert Category.product_count == 1  # Проверяем, что товар добавлен
+
+def test_category_incorrect(category_item: Category) -> None:
+    """Тест некорректных значений категории."""
+    assert category_item.name != "Смартфоны"
+    assert category_item.description != "Устройство связи"
+    assert len(category_item.products) != 0
+    assert Category.category_count != 0
+    assert Category.product_count != 0
