@@ -1,6 +1,8 @@
-from config import FILE_JSON
-from src.class_module import Product, Category
 import json
+
+from config import FILE_JSON
+from src.class_module import Category, Product
+
 
 def restract_object(path_file: str) -> list[Category]:
     """Функция берет JSON и преобразует объекты"""
