@@ -58,3 +58,14 @@ follow_untyped_imports = true
 [tool.isort]
 line_length = 119
 skip = [".venv", ".git", "__pycache__", "build", "dist"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/__init__.py",
+    "utils.py",
+    "migrations/*",
+    "main.py",
+    "conftest.py",
+    "config.py"
+]
