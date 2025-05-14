@@ -60,12 +60,7 @@ class Product:
 
     # Специальный вывод преобразования ссылки в строки для чтения
     def __str__(self) -> str:
-        return (
-            f"{self.name} | "
-            f"Цена: {self.price}₽ | "
-            f"Остаток: {self.quantity} шт. | "
-            f"Описание: {self.description}"
-        )
+        return f'{self.name}, {self.__price} руб. Остаток: {self.quantity} шт.'
 
 
 class Category:
