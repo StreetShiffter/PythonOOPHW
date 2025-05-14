@@ -58,9 +58,15 @@ class Product:
         self.__price = new_price
         print(f"Цена успешно изменена на {self.__price}")
 
-    # Специальный вывод преобразования ссылки в строки для чтения
+
     def __str__(self) -> str:
+        """Метод преобразования атрибутов в строку и вывод в консоль"""
         return f'{self.name}, {self.__price} руб. Остаток: {self.quantity} шт.'
+
+    def __add__(self, other):
+        """Метод складывания суммы товаров на складе"""
+        coast_product = self.__price * self.quantity + other.__price * other.quantity
+        return coast_product
 
 
 class Category:
@@ -81,6 +87,7 @@ class Category:
         Category.category_count += 1  # Счетчик категории
         Category.product_count += len(products)  # Счетчик товаров
 
+
     def add_product(self, product: 'Product') -> None:
         """Метод добавления нового продукта"""
         if not isinstance(product, Product):
@@ -95,3 +102,8 @@ class Category:
         for product in self.__products:
             products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
         return products_str
+
+
+    def __str__(self) -> str:
+        """Метод преобразования атрибутов в строку и вывод в консоль"""
+        return f'{self.name}, количество продуктов: {len(self.__products)} шт.'
