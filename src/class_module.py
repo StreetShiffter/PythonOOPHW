@@ -87,6 +87,9 @@ class Category:
         Category.category_count += 1  # Счетчик категории
         Category.product_count += len(products)  # Счетчик товаров
 
+    def get_products(self): #Безопасное получение приватного аттрибута
+        return self.__products.copy()
+
 
     def add_product(self, product: 'Product') -> None:
         """Метод добавления нового продукта"""
@@ -107,3 +110,39 @@ class Category:
     def __str__(self) -> str:
         """Метод преобразования атрибутов в строку и вывод в консоль"""
         return f'{self.name}, количество продуктов: {len(self.__products)} шт.'
+
+class Iterator:
+    """Класс для итерации и показ товар категории"""
+    def __init__(self, category_item):
+        self.category_item = category_item
+
+    def __iter__(self):
+        self.__index = 0
+        return self
+
+    def __next__(self):
+        products = self.category_item.get_products()
+        if self.__index < len(products):
+            product = products[self.__index]
+            self.__index += 1
+            return product
+        else:
+            raise StopIteration
+
+
+
+if __name__ == "__main__":
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    category = Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        [product1, product2, product3],
+    )
+
+    iterator = Iterator(category)
+
+    for product in iterator:
+        print(product)
