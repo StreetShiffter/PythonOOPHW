@@ -1,6 +1,6 @@
 import pytest
 
-from src.class_module import Category, Product
+from src.class_module import Category, Iterator, Product
 
 
 def test_product_correct(product_item: Product) -> None:
@@ -45,7 +45,7 @@ def test_add_product_increases_count(category_item: Category) -> None:
 
     category_item.add_product(new_product)
 
-    assert len(category_item._Category__products) == 2 # type: ignore
+    assert len(category_item._Category__products) == 2  # type: ignore
     assert Category.product_count == initial_count + 1
 
 
@@ -55,7 +55,7 @@ def test_add_product_correctly_adds(category_item: Category) -> None:
 
     category_item.add_product(new_product)
 
-    assert category_item._Category__products[-1] == new_product # type: ignore
+    assert category_item._Category__products[-1] == new_product  # type: ignore
 
 
 def test_products_property_returns_string(category_item: Category) -> None:
@@ -66,7 +66,7 @@ def test_products_property_returns_string(category_item: Category) -> None:
 def test_products_property_format(category_item: Category) -> None:
     """Тест формата возвращаемой строки"""
     result = category_item.products
-    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт.\n"
+    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт."
     assert result == expected
 
 
@@ -80,16 +80,15 @@ def test_product_price_setter_negative() -> None:
     assert product.price == 100  # Цена не должна измениться
 
 
-
 def test_add_non_product_to_category(category_item: Category) -> None:
     """Тест, что нельзя добавить не-Product в категорию"""
     with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product или его наследников"):
-        category_item.add_product("Это не продукт") # type: ignore
+        category_item.add_product("Это не продукт")  # type: ignore
 
 
 def test_new_product_merges_duplicates() -> None:
     """Тест, что new_product объединяет дубликаты"""
-    products_list = []
+    products_list: list = []
     product_data1 = {"name": "Телефон", "description": "Смартфон", "price": "50000", "quantity": "10"}
     product1 = Product.new_product(product_data1, products_list)
 
@@ -103,9 +102,82 @@ def test_new_product_merges_duplicates() -> None:
 
 def test_new_product_creates_new_if_no_duplicate() -> None:
     """Тест, что new_product создает новый продукт, если дубликата нет"""
-    products_list = []
+    products_list: list = []
     product_data = {"name": "Ноутбук", "description": "Игровой", "price": "100000", "quantity": "3"}
     product = Product.new_product(product_data, products_list)
 
     assert product in products_list  # Продукт должен быть добавлен в список
     assert len(products_list) == 1
+
+
+# Новые тесты 15.1
+def test_add_method() -> None:
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    assert (product1 + product2) == 2580000.0
+    assert (product1 + product3) == 1334000.0
+    assert (product2 + product3) == 2114000.0
+
+
+def test_str_method() -> None:
+    product = Product("Яблоко", "Это фрукты", 5, 10)
+    result = "Яблоко, 5 руб. Остаток: 10 шт."
+    assert str(product) == result
+
+
+def test_iterator_returns_all_products() -> None:
+    """Проверяет, что итератор возвращает все товары"""
+    product1 = Product("Яблоко", "Сладкое", 50.0, 10)
+    product2 = Product("Банан", "Экзотический", 30.0, 15)
+    product3 = Product("Апельсин", "Цитрус", 40.0, 20)
+
+    category = Category("Фрукты", "Все фрукты", [product1, product2, product3])
+    iterator = Iterator(category)
+
+    # Получаем продукты через итератор
+    result = []
+    for product in iterator:
+        result.append(product)
+
+    # Проверяем количество и наличие всех продуктов
+    assert len(result) == 3
+    assert product1 in result
+    assert product2 in result
+    assert product3 in result
+
+
+def test_iterator_raises_stopiteration_after_end() -> None:
+    """Проверяет, что после окончания итерации выбрасывается StopIteration"""
+    product = Product("Товар", "Описание", 100.0, 5)
+    category = Category("Тест", "Категория для теста", [product])
+    iterator = Iterator(category)
+
+    next(iterator)  # Получаем первый (и единственный) элемент
+
+    # Проверяем, что следующее обращение вызывает StopIteration
+    with pytest.raises(StopIteration):
+        next(iterator)
+
+
+def test_iterator_in_category_loop() -> None:
+    """Проверяем, что можно использовать for product in Iterator(...)"""
+    products = [
+        Product("Молоко", "Пастеризованное", 80.0, 20),
+        Product("Хлеб", "Ржаной", 30.0, 50),
+        Product("Сыр", "Твёрдый", 250.0, 10)
+    ]
+
+    category = Category("Продукты", "Основные продукты питания", products)
+    count = 0
+    seen_products = []
+
+    # Итерируемся через for-in
+    for product in Iterator(category):
+        seen_products.append(product)
+        count += 1
+
+    # Проверяем, что прошли по всем продуктам
+    assert count == len(products)
+    assert all(p in seen_products for p in products)

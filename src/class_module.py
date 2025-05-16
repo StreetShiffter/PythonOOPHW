@@ -1,12 +1,8 @@
-from typing import List, Union
+from typing import List, Self
+
 
 class Product:
     """Класс продуктов с подробным описанием"""
-
-    name: str
-    description: str
-    price: float
-    quantity: int
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
         self.name = name
@@ -15,7 +11,7 @@ class Product:
         self.quantity = quantity
 
     @classmethod
-    def new_product(cls, products_dict: dict, products_list: List['Product']) -> 'Product':
+    def new_product(cls, products_dict: dict, products_list: List["Product"]) -> "Product":
         """
         Добавляет новый продукт в список или обновляет существующий:
         - Если продукт с таким именем найден, увеличивает quantity, а цену делает максимальной.
@@ -36,7 +32,7 @@ class Product:
         products_list.append(new_product)
         return new_product
 
-    @property# type: ignore
+    @property  # type: ignore
     def price(self) -> float:
         """Вызов цены в приватном статусе"""
         return self.__price
@@ -58,22 +54,18 @@ class Product:
         self.__price = new_price
         print(f"Цена успешно изменена на {self.__price}")
 
-    # Специальный вывод преобразования ссылки в строки для чтения
     def __str__(self) -> str:
-        return (
-            f"{self.name} | "
-            f"Цена: {self.price}₽ | "
-            f"Остаток: {self.quantity} шт. | "
-            f"Описание: {self.description}"
-        )
+        """Метод преобразования атрибутов в строку и вывод в консоль"""
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other: "Product") -> float:
+        """Метод складывания суммы товаров на складе"""
+        coast_product = self.__price * self.quantity + other.__price * other.quantity
+        return coast_product
 
 
 class Category:
     """Класс категории с описанием и счетчиком продуктов"""
-
-    name: str
-    description: str
-    products: List[Product]
 
     category_count: int = 0
     product_count: int = 0
@@ -86,17 +78,73 @@ class Category:
         Category.category_count += 1  # Счетчик категории
         Category.product_count += len(products)  # Счетчик товаров
 
-    def add_product(self, product: 'Product') -> None:
+    def get_product(self) -> list[Product]:  # Безопасное получение приватного аттрибута
+        return self.__products.copy()
+
+    def add_product(self, product: "Product") -> None:
         """Метод добавления нового продукта"""
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product или его наследников")
         self.__products.append(product)
         Category.product_count += 1
 
-    @property# type: ignore
-    def products(self) -> str:
-        """Геттер с функцией вывода товаров"""
-        products_str = ""
-        for product in self.__products:
-            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
-        return products_str
+    @property
+    def products(self) -> str:  # Оставляем для обратной совместимости
+        """Геттер с функцией вывода товаров (возвращает строку)"""
+        return self.products_info()
+
+    @property
+    def product_list(self) -> List[Product]:  # Теперь возвращает список продуктов
+        """Геттер для списка продуктов"""
+        return self.__products
+
+    def products_info(self) -> str:  # Новый метод для строкового представления
+        """Возвращает строку с информацией о продуктах"""
+        return "\n".join(str(product) for product in self.__products)
+
+    def __str__(self) -> str:
+        """Метод преобразования атрибутов в строку и вывод в консоль"""
+        total = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total} шт."
+
+    def __len__(self) -> int:
+        """Возвращает количество продуктов в категории"""
+        return len(self.__products)
+
+
+class Iterator:
+    """Класс для итерации и показ товар категории"""
+
+    def __init__(self, category_item: Category):
+        self.category_item = category_item
+        self.index = 0 # Инициализируем index
+
+    def __iter__(self) -> Self:
+        self.index = 0 # Сбрасываем индекс при каждом новом итерировании
+        return self
+
+    def __next__(self) -> Product:
+        products = self.category_item.get_product()
+        if self.index < len(products):
+            product = products[self.index]
+            self.index += 1
+            return product
+        else:
+            raise StopIteration
+
+
+# if __name__ == "__main__":
+#     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+#     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+#     product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+#
+#     category = Category(
+#         "Смартфоны",
+#         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+#         [product1, product2, product3],
+#     )
+#
+#     iterator = Iterator(category)
+#
+#     for product in iterator:
+#         print(product)
