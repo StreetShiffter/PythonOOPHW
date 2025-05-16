@@ -58,6 +58,7 @@ class Product:
         """Метод преобразования атрибутов в строку и вывод в консоль"""
         return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
 
+
     def __add__(self, other: "Product") -> float:
         """Метод складывания суммы товаров на складе"""
         coast_product = self.__price * self.quantity + other.__price * other.quantity
@@ -88,17 +89,23 @@ class Category:
         self.__products.append(product)
         Category.product_count += 1
 
-    @property  # type: ignore
-    def products(self) -> str:
-        """Геттер с функцией вывода товаров"""
-        products_str = ""
-        for product in self.__products:
-            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
-        return products_str
+    @property
+    def products(self) -> List[Product]:  # Теперь возвращает список продуктов
+        """Геттер для списка продуктов"""
+        return self.__products
+
+    def products_info(self) -> str:  # Новый метод для строкового представления
+        """Возвращает строку с информацией о продуктах"""
+        return "\n".join(str(product) for product in self.__products)
 
     def __str__(self) -> str:
         """Метод преобразования атрибутов в строку и вывод в консоль"""
-        return f"{self.name}, количество продуктов: {len(self.__products)} шт."
+        total = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total} шт."
+
+    def __len__(self) -> int:
+        """Возвращает количество продуктов в категории"""
+        return len(self.__products)
 
 
 class Iterator:
@@ -108,31 +115,31 @@ class Iterator:
         self.category_item = category_item
 
     def __iter__(self) -> Self:
-        self.__index = 0
+        self.index = 0
         return self
 
     def __next__(self) -> Product:
         products = self.category_item.get_products()
-        if self.__index < len(products):
-            product = products[self.__index]
-            self.__index += 1
+        if self.index < len(products):
+            product = products[self.index]
+            self.index += 1
             return product
         else:
             raise StopIteration
 
 
-# if __name__ == "__main__":
-#     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-#     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
-#     product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
-#
-#     category = Category(
-#         "Смартфоны",
-#         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-#         [product1, product2, product3],
-#     )
-#
-#     iterator = Iterator(category)
-#
-#     for product in iterator:
-#         print(product)
+if __name__ == "__main__":
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    category = Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        [product1, product2, product3],
+    )
+
+    iterator = Iterator(category)
+
+    for product in iterator:
+        print(product)

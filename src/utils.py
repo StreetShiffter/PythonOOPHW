@@ -37,11 +37,13 @@ if __name__ == "__main__":
     print(f"Всего товаров: {Category.product_count}")
 
     # 3. Выводим подробную информацию по каждой категории
-    for category in categories:  # Теперь categories определена
+    for category in categories:
         print(f"\nКатегория: {category.name}")
         print(f"Описание: {category.description}")
         print(f"Количество товаров: {len(category.products)}")
 
-        # Выводим все товары в категории
-        for product in category.products:
-            print(f"  {product}")
+        for product in category.products:  # Теперь работает, потому что products — это List[Product]
+            print(f"  Товар: {product.name}")
+            print(f"    Описание: {product.description}")
+            print(f"    Цена: {product.price}")
+            print(f"    Количество: {product.quantity}")
