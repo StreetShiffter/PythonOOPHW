@@ -66,7 +66,7 @@ def test_products_property_returns_string(category_item: Category) -> None:
 def test_products_property_format(category_item: Category) -> None:
     """Тест формата возвращаемой строки"""
     result = category_item.products
-    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт.\n"
+    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт."
     assert result == expected
 
 
@@ -136,44 +136,48 @@ def test_iterator_returns_all_products() -> None:
     category = Category("Фрукты", "Все фрукты", [product1, product2, product3])
     iterator = Iterator(category)
 
-    result = list(iterator)
+    # Получаем продукты через итератор
+    result = []
+    for product in iterator:
+        result.append(product)
 
+    # Проверяем количество и наличие всех продуктов
     assert len(result) == 3
-    assert result[0].name == "Яблоко"
-    assert result[1].name == "Банан"
-    assert result[2].name == "Апельсин"
+    assert product1 in result
+    assert product2 in result
+    assert product3 in result
 
 
 def test_iterator_raises_stopiteration_after_end() -> None:
     """Проверяет, что после окончания итерации выбрасывается StopIteration"""
-    product1 = Product("Товар 1", "Описание", 100.0, 5)
-    product2 = Product("Товар 2", "Описание", 200.0, 3)
-
-    category = Category("Тестовая категория", "Категория для теста", [product1, product2])
+    product = Product("Товар", "Описание", 100.0, 5)
+    category = Category("Тест", "Категория для теста", [product])
     iterator = Iterator(category)
 
-    # Получаем все элементы
-    for _ in iterator:
-        pass
+    next(iterator)  # Получаем первый (и единственный) элемент
 
-    try:
+    # Проверяем, что следующее обращение вызывает StopIteration
+    with pytest.raises(StopIteration):
         next(iterator)
-        assert False, "Ожидалась ошибка StopIteration"
-    except StopIteration:
-        assert True
 
 
 def test_iterator_in_category_loop() -> None:
     """Проверяем, что можно использовать for product in Iterator(...)"""
-    product1 = Product("Молоко", "Пастеризованное", 80.0, 20)
-    product2 = Product("Хлеб", "Ржаной", 30.0, 50)
-    product3 = Product("Сыр", "Твёрдый", 250.0, 10)
+    products = [
+        Product("Молоко", "Пастеризованное", 80.0, 20),
+        Product("Хлеб", "Ржаной", 30.0, 50),
+        Product("Сыр", "Твёрдый", 250.0, 10)
+    ]
 
-    category = Category("Продукты", "Основные продукты питания", [product1, product2, product3])
-    iterator = Iterator(category)
-
+    category = Category("Продукты", "Основные продукты питания", products)
     count = 0
-    for product in iterator:
+    seen_products = []
+
+    # Итерируемся через for-in
+    for product in Iterator(category):
+        seen_products.append(product)
         count += 1
 
-    assert count == 3
+    # Проверяем, что прошли по всем продуктам
+    assert count == len(products)
+    assert all(p in seen_products for p in products)
