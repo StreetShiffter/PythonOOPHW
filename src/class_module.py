@@ -52,6 +52,8 @@ class Product:
                 return
 
         self.__price = new_price
+
+        
         print(f"Цена успешно изменена на {self.__price}")
 
     def __str__(self) -> str:
@@ -62,6 +64,39 @@ class Product:
         """Метод складывания суммы товаров на складе"""
         coast_product = self.__price * self.quantity + other.__price * other.quantity
         return coast_product
+
+class Smartphone(Product):
+    """ Класс продукта «Смартфон» """
+    def __init__(self, name: str,
+                 description: str,
+                 price: float,
+                 quantity: int,
+                 efficiency: str,
+                 model: str,
+                 memory: int,
+                 color: str ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+
+
+class LawnGrass(Product):
+    """ Класс продукта «Трава газонная» """
+    def __init__(self, name: str,
+                 description: str,
+                 price: float,
+                 quantity: int,
+                 country: str,
+                 germination_period: int,
+                 color: str) -> None:
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
 
 
 class Category:
@@ -97,6 +132,17 @@ class Category:
     def product_list(self) -> List[Product]:  # Теперь возвращает список продуктов
         """Геттер для списка продуктов"""
         return self.__products
+
+    def product_check_list(self):
+        """Выводит имя каждого продукта с указанием его типа"""
+        for product in self.product_list:
+            if isinstance(product, Smartphone):
+                print(f'[Смартфон] {product.name}')
+            elif isinstance(product, LawnGrass):
+                print(f'[Газонная трава] {product.name}')
+            else:
+                print(f'[Обычный товар] {product.name}')
+
 
     def products_info(self) -> str:  # Новый метод для строкового представления
         """Возвращает строку с информацией о продуктах"""
