@@ -81,7 +81,11 @@ class Smartphone(Product):
         self.memory = memory
         self.color = color
 
-
+    def __add__(self, other: "Smartphone") -> int:
+        """Метод складывания количества товаров на складе"""
+        if type(self) is not type(other):
+            raise TypeError('Возникла ошибка TypeError при добавлении не продукта')
+        return self.quantity + other.quantity
 
 class LawnGrass(Product):
     """ Класс продукта «Трава газонная» """
@@ -96,6 +100,12 @@ class LawnGrass(Product):
         self.country = country
         self.germination_period = germination_period
         self.color = color
+
+    def __add__(self, other: "LawnGrass") -> int:
+        """Метод складывания количества товаров на складе"""
+        if type(self) is not type(other):
+            raise TypeError('Возникла ошибка TypeError при добавлении не продукта')
+        return self.quantity + other.quantity
 
 
 
@@ -142,7 +152,6 @@ class Category:
                 print(f'[Газонная трава] {product.name}')
             else:
                 print(f'[Обычный товар] {product.name}')
-
 
     def products_info(self) -> str:  # Новый метод для строкового представления
         """Возвращает строку с информацией о продуктах"""
