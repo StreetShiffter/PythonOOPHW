@@ -52,8 +52,6 @@ class Product:
                 return
 
         self.__price = new_price
-
-        
         print(f"Цена успешно изменена на {self.__price}")
 
     def __str__(self) -> str:
@@ -116,6 +114,10 @@ class Category:
     product_count: int = 0
 
     def __init__(self, name: str, description: str, products: List[Product]) -> None:
+        for product in products:
+            if not isinstance(product, Product):
+                raise TypeError("В категорию можно добавлять только объекты класса Product или его наследников")
+
         self.name = name
         self.description = description
         self.__products = products
@@ -130,6 +132,13 @@ class Category:
         """Метод добавления нового продукта"""
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+
+        # Проверяем, есть ли уже товары в категории
+        if self.__products:
+            check_type = type(self.__products[0])
+            if type(product) is not check_type:
+                raise TypeError(f"В эту категорию можно добавлять только товары типа {check_type.__name__}")
+
         self.__products.append(product)
         Category.product_count += 1
 
