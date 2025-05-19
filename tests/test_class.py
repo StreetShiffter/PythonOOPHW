@@ -1,6 +1,8 @@
+from unittest.mock import patch
+
 import pytest
 
-from src.class_module import Category, Iterator, Product
+from src.class_module import Category, Iterator, LawnGrass, Product, Smartphone
 
 
 def test_product_correct(product_item: Product) -> None:
@@ -24,9 +26,9 @@ def test_category_correct(category_item: Category) -> None:
     assert category_item.name == "Телевизоры"
     assert category_item.description == "Устройство отображения фильмов и тв-передач"
     # Если в фикстуре 1 товар
-    assert len(category_item._Category__products) == 1  # type: ignore
+    assert len(category_item._Category__products) == 2  # type: ignore
     assert Category.category_count == 1  # Проверяем, что счетчик увеличился
-    assert Category.product_count == 1  # Проверяем, что товар добавлен
+    assert Category.product_count == 2  # Проверяем, что товар добавлен
 
 
 def test_category_incorrect(category_item: Category) -> None:
@@ -45,7 +47,7 @@ def test_add_product_increases_count(category_item: Category) -> None:
 
     category_item.add_product(new_product)
 
-    assert len(category_item._Category__products) == 2  # type: ignore
+    assert len(category_item._Category__products) == 3  # type: ignore
     assert Category.product_count == initial_count + 1
 
 
@@ -66,7 +68,7 @@ def test_products_property_returns_string(category_item: Category) -> None:
 def test_products_property_format(category_item: Category) -> None:
     """Тест формата возвращаемой строки"""
     result = category_item.products
-    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт."
+    expected = "Samsung QLED, 50000 руб. Остаток: 5 шт.\n" "Samsung LED, 20000 руб. Остаток: 20 шт."
     assert result == expected
 
 
@@ -121,6 +123,16 @@ def test_add_method() -> None:
     assert (product2 + product3) == 2114000.0
 
 
+def test_add_method_right() -> None:
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    assert (product1 + product2) == 2580000.0
+    assert (product1 + product3) == 1334000.0
+    assert (product2 + product3) == 2114000.0
+
+
 def test_str_method() -> None:
     product = Product("Яблоко", "Это фрукты", 5, 10)
     result = "Яблоко, 5 руб. Остаток: 10 шт."
@@ -166,7 +178,7 @@ def test_iterator_in_category_loop() -> None:
     products = [
         Product("Молоко", "Пастеризованное", 80.0, 20),
         Product("Хлеб", "Ржаной", 30.0, 50),
-        Product("Сыр", "Твёрдый", 250.0, 10)
+        Product("Сыр", "Твёрдый", 250.0, 10),
     ]
 
     category = Category("Продукты", "Основные продукты питания", products)
@@ -181,3 +193,127 @@ def test_iterator_in_category_loop() -> None:
     # Проверяем, что прошли по всем продуктам
     assert count == len(products)
     assert all(p in seen_products for p in products)
+
+
+# Новые тесты 16.1
+
+
+def test_smartfone_check(smartphone_item: Smartphone) -> None:
+    """Тест корректного отображения объекта класса 'Smartphone'"""
+    assert smartphone_item.name == "Samsung"
+    assert smartphone_item.description == "Смартфон корейский"
+    assert smartphone_item.price == 80000
+    assert smartphone_item.efficiency == 11.0
+    assert smartphone_item.model == "s20"
+    assert smartphone_item.memory == 8
+    assert smartphone_item.color == "green"
+
+
+def test_lawngrass_item_check(lawngrass_item: LawnGrass) -> None:
+    """Тест корректного отображения объекта класса 'LawnGrass'"""
+    assert lawngrass_item.name == "Муравушка"
+    assert lawngrass_item.description == "Газонная трава"
+    assert lawngrass_item.price == 500
+    assert lawngrass_item.quantity == 10
+    assert lawngrass_item.country == "Колумбия"
+    assert lawngrass_item.germination_period == "3 месяца"
+    assert lawngrass_item.color == "Зеленая"
+
+
+def test_add_method_smartphone(smartphone_item: Smartphone) -> None:
+    """Тест корректного сложения объектов класса 'Smartphone'"""
+    smartphone_new = Smartphone("Iphone", "512GB, Красный цвет, 150MP камера", 300000.0, 4, 19.0, "16Pro", 32, "Red")
+    smartphone_sum = smartphone_new + smartphone_item
+    assert smartphone_sum
+
+
+def test_add_method_smartphone_rise() -> None:
+    """Тест не корректного сложения объектов класса 'Smartphone'"""
+    with pytest.raises(TypeError):
+        smartphone1 = Smartphone(
+            "Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5, 11.0, "s20", 8, "green"
+        )
+        smartphone2 = "ТИЛИФОН"
+        smartphone_sum = smartphone1 + smartphone2
+        assert smartphone_sum
+
+
+def test_add_method_lawngrass(lawngrass_item: LawnGrass) -> None:
+    """Тест корректного сложения объектов класса 'LawnGrass'"""
+    lawngrass_new = LawnGrass("Летняя", "Газонная трава", 1000, 30, "Россия", "2 месяца", "Зеленая")
+
+    lawngrass_sum = lawngrass_new + lawngrass_item
+    assert lawngrass_sum
+
+
+def test_add_method_lawngrass_rise() -> None:
+    """Тест не корректного сложения объектов класса 'LawnGrass'"""
+    with pytest.raises(TypeError):
+        lawngrass1 = LawnGrass("Травинушка", "Газонная трава", 700, 2, "Казахстан", "1 неделя", "Синяя")
+        lawngrass2 = 1
+        lawngrass_sum = lawngrass1 + lawngrass2
+        assert lawngrass_sum
+
+
+def test_add_method_rise(smartphone_item, lawngrass_item, product_item):
+    """Тест ошибки сложения разных типов объектов"""
+    with pytest.raises(TypeError):
+        product1 = smartphone_item
+        product2 = lawngrass_item
+        product3 = product_item
+
+        assert product1 + product2
+        assert product3 + "Smartphone"
+
+
+def test_add_with_non_product_raises_typeerror():
+    """Тест что сложение с не-Product объектом вызывает TypeError"""
+    product = Product("Груша", "Фрукты", 8, 9)
+    with pytest.raises(TypeError):
+        assert product + 100  # попытка сложить с числом
+    with pytest.raises(TypeError):
+        assert product + "строка"  # попытка сложить со строкой
+
+
+@patch("src.class_module.input")
+def test_price_with_confirmation_approved(mock_input):
+    # Настраиваем mock input возвращать 'y' при вызове
+    mock_input.return_value = "y"
+
+    product = Product("Samsung QLED", "4K TV", 50000, 5)
+    original_price = product.price  # Сохраняем оригинальную цену
+    new_price = 40000  # Меньше текущей цены
+
+    # Пытаемся установить новую цену
+    product.price = new_price
+
+    # Проверяем, что input был вызван с правильным сообщением
+    # (сравниваем с оригинальной ценой, а не новой)
+    mock_input.assert_called_once_with(
+        f"Новая цена {new_price} ниже текущей {original_price}. Подтвердите изменение (y/n): "
+    )
+
+    # Проверяем, что цена действительно изменилась
+    assert product.price == new_price
+
+
+@patch("src.class_module.input")
+def test_price_with_confirmation__not_approved(mock_input):
+    # Настраиваем mock input возвращать 'n' при вызове
+    mock_input.return_value = "n"
+    new_price = 40000  # Меньше текущей цены
+
+    product = Product("Samsung QLED", "4K TV", 50000, 5)
+    original_price = product.price  # Сохраняем оригинальную цену
+
+    # Пытаемся установить новую цену
+    product.price = new_price
+
+    # Проверяем, что input был вызван с правильным сообщением
+    # (сравниваем с оригинальной ценой, а не новой)
+    mock_input.assert_called_once_with(
+        f"Новая цена {new_price} ниже текущей {original_price}. Подтвердите изменение (y/n): "
+    )
+
+    # Проверяем, что цена действительно изменилась
+    assert product.price != new_price
