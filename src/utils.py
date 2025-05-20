@@ -40,10 +40,13 @@ if __name__ == "__main__":
     for category in categories:
         print(f"\nКатегория: {category.name}")
         print(f"Описание: {category.description}")
-        print(f"Количество товаров: {len(category.products)}")
+        print(f"Количество товаров: {len(category.product_list)}")
 
-        for product in category.products:  # Теперь работает, потому что products — это List[Product]
-            print(f"  Товар: {product.name}")
+        for product in category.product_list:  # <-- исправлено здесь
+            print(f" Товар: {product.name}")
+            print("-" * 50)
             print(f"    Описание: {product.description}")
+            print("-" * 30)
             print(f"    Цена: {product.price}")
+            print("-" * 30)
             print(f"    Количество: {product.quantity}")

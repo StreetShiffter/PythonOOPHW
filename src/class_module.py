@@ -60,8 +60,62 @@ class Product:
 
     def __add__(self, other: "Product") -> float:
         """Метод складывания суммы товаров на складе"""
+        if not isinstance(other, Product):
+            raise TypeError("Возникла ошибка TypeError при добавлении не продукта")
         coast_product = self.__price * self.quantity + other.__price * other.quantity
         return coast_product
+
+
+class Smartphone(Product):
+    """Класс продукта «Смартфон»"""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: float,
+        model: str,
+        memory: int,
+        color: str,
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __add__(self, other: "Smartphone | LawnGrass | Product") -> int:
+        """Метод складывания количества товаров на складе"""
+        if type(self) is not type(other):
+            raise TypeError("Возникла ошибка TypeError при добавлении не того товара")
+        return self.quantity + other.quantity
+
+
+class LawnGrass(Product):
+    """Класс продукта «Трава газонная»"""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: str,
+        color: str,
+    ) -> None:
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __add__(self, other: "Smartphone | LawnGrass | Product") -> int:
+        """Метод складывания количества товаров на складе"""
+        if type(self) is not type(other):
+            raise TypeError("Возникла ошибка TypeError при добавлении не продукта")
+        return self.quantity + other.quantity
 
 
 class Category:
@@ -71,6 +125,10 @@ class Category:
     product_count: int = 0
 
     def __init__(self, name: str, description: str, products: List[Product]) -> None:
+        for product in products:
+            if not isinstance(product, Product):
+                raise TypeError("В категорию можно добавлять только объекты класса Product или его наследников")
+
         self.name = name
         self.description = description
         self.__products = products
@@ -85,6 +143,13 @@ class Category:
         """Метод добавления нового продукта"""
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+
+        # Проверяем, есть ли уже товары в категории
+        if self.__products:
+            check_type = type(self.__products[0])
+            if type(product) is not check_type:
+                raise TypeError(f"В эту категорию можно добавлять только товары типа {check_type.__name__}")
+
         self.__products.append(product)
         Category.product_count += 1
 
@@ -97,6 +162,16 @@ class Category:
     def product_list(self) -> List[Product]:  # Теперь возвращает список продуктов
         """Геттер для списка продуктов"""
         return self.__products
+
+    def product_check_list(self) -> None:
+        """Выводит имя каждого продукта с указанием его типа"""
+        for product in self.product_list:
+            if isinstance(product, Smartphone):
+                print(f"[Смартфон] {product.name}")
+            elif isinstance(product, LawnGrass):
+                print(f"[Газонная трава] {product.name}")
+            else:
+                print(f"[Обычный товар] {product.name}")
 
     def products_info(self) -> str:  # Новый метод для строкового представления
         """Возвращает строку с информацией о продуктах"""
@@ -117,10 +192,10 @@ class Iterator:
 
     def __init__(self, category_item: Category):
         self.category_item = category_item
-        self.index = 0 # Инициализируем index
+        self.index = 0  # Инициализируем index
 
     def __iter__(self) -> Self:
-        self.index = 0 # Сбрасываем индекс при каждом новом итерировании
+        self.index = 0  # Сбрасываем индекс при каждом новом итерировании
         return self
 
     def __next__(self) -> Product:
