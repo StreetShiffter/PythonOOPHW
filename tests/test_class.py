@@ -123,14 +123,56 @@ def test_add_method() -> None:
     assert (product2 + product3) == 2114000.0
 
 
-def test_add_method_right() -> None:
+def test_init_rise() -> None:
+        product = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+        with pytest.raises(TypeError):
+            Category("Смартфоны", "Высокопроизводительные смартфоны", [product, 321])
+
+
+def test_add_product_raises_error_when_adding_wrong_type():
+    # Создаём начальный продукт
+    smartphone = Smartphone("iPhone",
+                            "Смартфон Apple",
+                            100000.0,
+                            10,
+                            11,
+                            "15 Pro",
+                            8,
+                            "grey")
+
+    # Создаём категорию с ним
+    category = Category("Смартфоны", "Высокопроизводительные смартфоны", [smartphone])
+
+    # Пробуем добавить продукт другого типа
+    trava = LawnGrass("Красная кружка",
+                      "Удобная кружка для кофе",
+                      500.0,
+                      100,
+                      "Russia",
+                      "1 week",
+                      "Green")
+
+    # Ожидаем TypeError
+    with pytest.raises(TypeError) as exc_info:
+        category.add_product(trava)
+
+    # Проверяем текст ошибки
+    expected_message = f"В эту категорию можно добавлять только товары типа {type(smartphone).__name__}"
+    assert str(exc_info.value) == expected_message
+
+
+def test_getter_product() -> None:
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
-    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+    category = Category("Смартфоны", "Высокопроизводительные смартфоны", [product1, product2])
+    assert category.product_list
 
-    assert (product1 + product2) == 2580000.0
-    assert (product1 + product3) == 1334000.0
-    assert (product2 + product3) == 2114000.0
+
+def test_check_list_product() -> None:
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    category = Category("Смартфоны", "Высокопроизводительные смартфоны", [product1, product2])
+    assert category.product_list
 
 
 def test_str_method() -> None:
