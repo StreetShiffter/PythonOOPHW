@@ -1,7 +1,8 @@
+from src.class_abstract import BaseProduct
 from typing import List, Self
 
 
-class Product:
+class Product(BaseProduct):
     """Класс продуктов с подробным описанием"""
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
