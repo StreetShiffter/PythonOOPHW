@@ -1,8 +1,9 @@
 from src.class_abstract import BaseProduct
+from src.miksin_module import MixinPrint
 from typing import List, Self
 
 
-class Product(BaseProduct):
+class Product(BaseProduct, MixinPrint):
     """Класс продуктов с подробным описанием"""
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
@@ -10,6 +11,8 @@ class Product(BaseProduct):
         self.description = description
         self.__price = price
         self.quantity = quantity
+        super().__init__()
+
 
     @classmethod
     def new_product(cls, products_dict: dict, products_list: List["Product"]) -> "Product":
@@ -86,6 +89,7 @@ class Smartphone(Product):
         self.model = model
         self.memory = memory
         self.color = color
+
 
     def __add__(self, other: "Smartphone | LawnGrass | Product") -> int:
         """Метод складывания количества товаров на складе"""
@@ -207,6 +211,10 @@ class Iterator:
             return product
         else:
             raise StopIteration
+
+
+
+
 
 
 # if __name__ == "__main__":
