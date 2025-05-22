@@ -12,6 +12,11 @@ class BaseProduct(ABC):
     def price(self) -> float:
         pass
 
+    @classmethod
+    @abstractmethod
+    def new_product(cls, *args, **kwargs):
+        pass
+
     @abstractmethod
     def __str__(self) -> str:
         pass

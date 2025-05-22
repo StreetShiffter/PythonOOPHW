@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from src.class_module import Category, Iterator, LawnGrass, Product, Smartphone
+from src.class_abstract import BaseProduct
 
 
 def test_product_correct(product_item: Product) -> None:
