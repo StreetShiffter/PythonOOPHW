@@ -1,4 +1,4 @@
-from src.class_abstract import BaseProduct
+from src.class_abstract import BaseProduct, FormationProduct
 from src.miksin_module import MixinPrint
 from typing import List, Self
 
@@ -123,7 +123,7 @@ class LawnGrass(Product):
         return self.quantity + other.quantity
 
 
-class Category:
+class Category(FormationProduct):
     """Класс категории с описанием и счетчиком продуктов"""
 
     category_count: int = 0
@@ -213,7 +213,25 @@ class Iterator:
             raise StopIteration
 
 
+class Order(FormationProduct):
+    """Класс для оформления заказа"""
 
+    def __init__(self, product, quantity):
+        self.product = product  # Ссылка на объект товара (например, Smartphone или LawnGrass)
+
+        self.quantity = quantity # Количество купленного товара
+        if product.quantity < self.quantity:
+            raise ValueError("Количество заказа превышает количество на складе")
+
+        self.total_price = product.price * quantity  # Итоговая стоимость
+
+    def __str__(self):
+        return f'{self.product}, {self.quantity}, {self.total_price}'
+
+
+product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+ssilka = Order(product1, 5)
+print(ssilka)
 
 
 

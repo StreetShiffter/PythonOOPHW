@@ -16,3 +16,7 @@ class BaseProduct(ABC):
     def __str__(self) -> str:
         pass
 
+class FormationProduct(ABC):
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
