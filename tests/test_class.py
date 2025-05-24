@@ -1,10 +1,7 @@
 from unittest.mock import patch
-
 import pytest
-
-from src.class_module import Category, Iterator, LawnGrass, Product, Smartphone
-from src.class_abstract import BaseProduct
-
+import unittest
+from src.class_module import Category, Iterator, LawnGrass, Product, Smartphone, Order
 
 def test_product_correct(product_item: Product) -> None:
     """Тест корректных значений продукта."""
@@ -298,7 +295,7 @@ def test_add_method_lawngrass_rise() -> None:
         assert lawngrass_sum
 
 
-def test_add_method_rise(smartphone_item, lawngrass_item, product_item):
+def test_add_method_rise(smartphone_item, lawngrass_item, product_item) -> None:
     """Тест ошибки сложения разных типов объектов"""
     with pytest.raises(TypeError):
         product1 = smartphone_item
@@ -309,7 +306,7 @@ def test_add_method_rise(smartphone_item, lawngrass_item, product_item):
         assert product3 + "Smartphone"
 
 
-def test_add_with_non_product_raises_typeerror():
+def test_add_with_non_product_raises_typeerror() -> None:
     """Тест что сложение с не-Product объектом вызывает TypeError"""
     product = Product("Груша", "Фрукты", 8, 9)
     with pytest.raises(TypeError):
@@ -319,7 +316,9 @@ def test_add_with_non_product_raises_typeerror():
 
 
 @patch("src.class_module.input")
-def test_price_with_confirmation_approved(mock_input):
+def test_price_with_confirmation_approved(mock_input) -> None:
+    """Тест перехвата положительного ответа пользователя"""
+
     # Настраиваем mock input возвращать 'y' при вызове
     mock_input.return_value = "y"
 
@@ -341,7 +340,8 @@ def test_price_with_confirmation_approved(mock_input):
 
 
 @patch("src.class_module.input")
-def test_price_with_confirmation__not_approved(mock_input):
+def test_price_with_confirmation__not_approved(mock_input) -> None:
+    """Тест перехвата отрицательного ответа пользователя"""
     # Настраиваем mock input возвращать 'n' при вызове
     mock_input.return_value = "n"
     new_price = 40000  # Меньше текущей цены
@@ -360,3 +360,57 @@ def test_price_with_confirmation__not_approved(mock_input):
 
     # Проверяем, что цена действительно изменилась
     assert product.price != new_price
+
+def test_order_valid(product_item: Product) -> None:
+    """Тест класса заказа при валидных данных"""
+    total_order = Order(product_item, 20)
+    assert total_order
+
+def test_order_str() -> None:
+    """Тест класса заказа при валидных данных и вывод строки в консоль"""
+    product = Product("Телевизор", "4K телевизор", 30000.0, 10)
+    order = Order(product=product, quantity=2)
+    expected_str = 'Телевизор, 30000.0 руб. Остаток: 10 шт., 2, 60000.0'
+    assert str(order) == expected_str
+
+def test_order_invalid(product_item: Product) -> None:
+    """Тест класса заказа при невалидных данных"""
+    with pytest.raises(ValueError) as text_error:
+        total_order = Order(product_item, 25)
+        assert text_error == total_order
+
+def test_products_info(sample_category) -> None:
+    """Проверка вывода информации категории"""
+    expected = (
+        "Телевизор, 30000.0 руб. Остаток: 10 шт.\n"
+        "iPhone 15, 210000.0 руб. Остаток: 8 шт.\n"
+        "Газонная трава Элит, 500.0 руб. Остаток: 20 шт."
+    )
+    assert sample_category.products_info() == expected
+
+
+def test_str_method_category(sample_category) -> None:
+    """Проверка вывода информации категории в виде строчного вывода"""
+    expected = "Электроника, количество продуктов: 38 шт."
+    assert str(sample_category) == expected
+
+
+def test_len_method_category(sample_category):
+    """Проверка вывода информации длины категории"""
+    assert len(sample_category) == 3
+
+def test_product_check_list(sample_category, capsys) -> None:
+    """
+    Проверяет, что метод product_check_list() корректно выводит типы продуктов.
+    """
+    expected_output = (
+        "[Обычный товар] Телевизор\n"
+        "[Смартфон] iPhone 15\n"
+        "[Газонная трава] Газонная трава Элит\n"
+    )
+
+    sample_category.product_check_list()
+
+    # Получаем вывод stdout
+    captured = capsys.readouterr()
+    assert captured.out == expected_output
