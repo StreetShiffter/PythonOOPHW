@@ -28,3 +28,13 @@ def category_item() -> Category:
     product2 = Product("Samsung LED", "HD TV", 20000, 20)
     products = [product1, product2]
     return Category("Телевизоры", "Устройство отображения фильмов и тв-передач", products)
+
+@pytest.fixture
+def sample_category():
+    product1 = Product("Телевизор", "4K телевизор", 30000.0, 10)
+    smartphone1 = Smartphone("iPhone 15", "512GB, Gray space", 210000.0, 8, 98.2, "15", 512, "Gray space")
+    lawn_grass1 = LawnGrass("Газонная трава Элит", "Высококачественная трава", 500.0, 20, "Россия", "30 дней", "Зеленый")
+
+    products = [product1, smartphone1, lawn_grass1]
+    category = Category("Электроника", "Различные электронные устройства", products)
+    return category

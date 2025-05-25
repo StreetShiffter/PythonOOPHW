@@ -68,5 +68,6 @@ omit = [
     "migrations/*",
     "main.py",
     "conftest.py",
-    "config.py"
+    "config.py",
+    "class_abstract.py"
 ]
