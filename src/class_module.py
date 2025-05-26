@@ -1,4 +1,5 @@
 from src.class_abstract import BaseProduct, FormationProduct
+from src.class_exeption import UndefinedObject
 from src.mixin_module import MixinPrint
 from typing import List, Self
 
@@ -192,7 +193,24 @@ class Category(FormationProduct):
         """Возвращает количество продуктов в категории"""
         return len(self.__products)
 
+    def middle_price(self):
+        """Метод подсчета средней цены всех товаров"""
+        try:
+            if not self.product_list:
+                raise UndefinedObject("Список товаров пуст")
 
+            prices = [product.price for product in self.product_list if product.price]
+            average_sum_product = sum(prices) / len(prices)
+
+        except ZeroDivisionError:
+            print("На ноль делить нельзя")
+        except UndefinedObject as e:
+            print (f"Ошибка: {e}")
+            return 0
+        else:
+            return average_sum_product
+        finally:
+            print("Операция завершена")
 
 class Iterator:
     """Класс для итерации и показ товар категории"""
@@ -232,8 +250,8 @@ class Order(FormationProduct):
 
 
 # if __name__ == "__main__":
-    # product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    # product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+#     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+#     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
 #     # product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
 #     # grass1 = LawnGrass("Газонная трава", "Элитная трава для газона", 500.0, 20, "Россия", "7 дней", "Зеленый")
 #     # grass2 = LawnGrass("Газонная трава 2", "Выносливая трава", 450.0, 15, "США", "5 дней", "Темно-зеленый")
@@ -287,9 +305,10 @@ class Order(FormationProduct):
     # category = Category(
     #     "Смартфоны",
     #     "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-    #     [product1, product2, product3],
+    #     [product1, product2],
     # )
-    #
+    # print(category.middle_price())
+
     # iterator = Iterator(category)
     #
     # for product in iterator:
