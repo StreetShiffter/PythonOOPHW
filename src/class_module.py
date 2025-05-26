@@ -139,6 +139,15 @@ class Category(FormationProduct):
         self.name = name
         self.description = description
         self.__products = products
+        try:
+            if not self.__products:
+                raise UndefinedObject("Передан пустой список")
+        except UndefinedObject as e:
+            print(f"Вызвана ошибка: {e}")
+        else:
+            print("Товар добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
 
         Category.category_count += 1  # Счетчик категории
         Category.product_count += len(products)  # Счетчик товаров
@@ -235,21 +244,32 @@ class Iterator:
 
 class Order(FormationProduct):
     """Класс для оформления заказа"""
-
     def __init__(self, product, quantity):
-        self.product = product  # Ссылка на объект товара (например, Smartphone или LawnGrass)
-
-        self.quantity = quantity # Количество купленного товара
-        if product.quantity < self.quantity:
-            raise ValueError("Количество заказа превышает количество на складе")
+        self.product = product# Ссылка на объект товара (например, Smartphone или LawnGrass)
+        self.quantity = quantity  # Количество купленного товара
+        try:
+            if product.quantity < self.quantity:
+                raise ValueError("Количество заказа превышает количество на складе")
+            elif self.quantity <= 0:
+                raise UndefinedObject("Количество товара должно быть больше нуля")
+        except ValueError as e:
+            print(f"Вызвана ошибка: {e}")
+        except UndefinedObject as e:
+            print(f"Ошибка: {e}")
+            self.total_price = 0  # Дефолтное значение
+        else:
+            print("Товар добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
 
         self.total_price = product.price * quantity  # Итоговая стоимость
+
 
     def __str__(self):
         return f'{self.product}, {self.quantity}, {self.total_price}'
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 #     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
 #     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
 #     # product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
@@ -307,6 +327,7 @@ class Order(FormationProduct):
     #     "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
     #     [product1, product2],
     # )
+
     # print(category.middle_price())
 
     # iterator = Iterator(category)
@@ -315,6 +336,6 @@ class Order(FormationProduct):
     #     print(product)
 #---------------------------------------------
 
-    # product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    # total = Order(product1, 10)
-    # print(total)
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    total = Order(product1, 0)
+    print(total)
