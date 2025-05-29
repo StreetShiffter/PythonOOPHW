@@ -1,6 +1,8 @@
-from src.class_abstract import BaseProduct, FormationProduct
-from src.mixin_module import MixinPrint
 from typing import List, Self
+
+from src.class_abstract import BaseProduct, FormationProduct
+from src.class_exeption import UndefinedObject
+from src.mixin_module import MixinPrint
 
 
 class Product(BaseProduct, MixinPrint):
@@ -11,8 +13,11 @@ class Product(BaseProduct, MixinPrint):
         self.description = description
         self.__price = price
         self.quantity = quantity
+        if self.quantity == 0:
+            raise ValueError(
+                "Возникла ошибка ValueError прерывающая работу программы при попытке добавить продукт с нулевым количеством"
+            )
         super().__init__()
-
 
     @classmethod
     def new_product(cls, products_dict: dict, products_list: List["Product"]) -> "Product":
@@ -74,22 +79,21 @@ class Smartphone(Product):
     """Класс продукта «Смартфон»"""
 
     def __init__(
-        self,
-        name: str,
-        description: str,
-        price: float,
-        quantity: int,
-        efficiency: float,
-        model: str,
-        memory: int,
-        color: str,
+            self,
+            name: str,
+            description: str,
+            price: float,
+            quantity: int,
+            efficiency: float,
+            model: str,
+            memory: int,
+            color: str,
     ) -> None:
         super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
         self.color = color
-
 
     def __add__(self, other: "Smartphone | LawnGrass | Product") -> int:
         """Метод складывания количества товаров на складе"""
@@ -102,14 +106,14 @@ class LawnGrass(Product):
     """Класс продукта «Трава газонная»"""
 
     def __init__(
-        self,
-        name: str,
-        description: str,
-        price: float,
-        quantity: int,
-        country: str,
-        germination_period: str,
-        color: str,
+            self,
+            name: str,
+            description: str,
+            price: float,
+            quantity: int,
+            country: str,
+            germination_period: str,
+            color: str,
     ) -> None:
         super().__init__(name, description, price, quantity)
         self.country = country
@@ -121,6 +125,9 @@ class LawnGrass(Product):
         if type(self) is not type(other):
             raise TypeError("Возникла ошибка TypeError при добавлении не продукта")
         return self.quantity + other.quantity
+
+
+# print(LawnGrass.__mro__)
 
 
 class Category(FormationProduct):
@@ -137,6 +144,15 @@ class Category(FormationProduct):
         self.name = name
         self.description = description
         self.__products = products
+        try:
+            if not self.__products:
+                raise UndefinedObject("Передан пустой список")
+        except UndefinedObject as e:
+            print(f"Вызвана ошибка: {e}")
+        else:
+            print("Товар добавлен")
+        finally:
+            print("Обработка добавления товара завершена")
 
         Category.category_count += 1  # Счетчик категории
         Category.product_count += len(products)  # Счетчик товаров
@@ -191,6 +207,25 @@ class Category(FormationProduct):
         """Возвращает количество продуктов в категории"""
         return len(self.__products)
 
+    def middle_price(self):
+        """Метод подсчета средней цены всех товаров"""
+        try:
+            if not self.product_list:
+                raise UndefinedObject("Список товаров пуст")
+
+            prices = [product.price for product in self.product_list if product.price]
+            average_sum_product = sum(prices) / len(prices)
+
+        except ZeroDivisionError:
+            print("На ноль делить нельзя")
+        except UndefinedObject as e:
+            print(f"Ошибка: {e}")
+            return 0
+        else:
+            return average_sum_product
+        finally:
+            print("Операция завершена")
+
 
 class Iterator:
     """Класс для итерации и показ товар категории"""
@@ -218,82 +253,95 @@ class Order(FormationProduct):
 
     def __init__(self, product, quantity):
         self.product = product  # Ссылка на объект товара (например, Smartphone или LawnGrass)
+        self.quantity = quantity  # Количество купленного товара
 
-        self.quantity = quantity # Количество купленного товара
-        if product.quantity < self.quantity:
-            raise ValueError("Количество заказа превышает количество на складе")
-
-        self.total_price = product.price * quantity  # Итоговая стоимость
+        try:
+            if product.quantity < self.quantity:
+                raise ValueError("Количество заказа превышает количество на складе")
+            elif self.quantity <= 0:
+                raise UndefinedObject("Количество товара должно быть больше нуля")
+        except ValueError as e:
+            print(f"Вызвана ошибка: {e}")
+            self.total_price = 0
+        except UndefinedObject as e:
+            print(f"Ошибка: {e}")
+            self.total_price = 0  # Значение по умолчанию при ошибке
+        else:
+            print("Товар добавлен")
+            self.total_price = product.price * quantity  # Итоговая стоимость заказа
+        finally:
+            print("Обработка добавления товара завершена")
 
     def __str__(self):
-        return f'{self.product}, {self.quantity}, {self.total_price}'
-
+        return f"{self.product}, {self.quantity}, {self.total_price}"
 
 # if __name__ == "__main__":
-    # product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    # product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
-    # product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
-    # grass1 = LawnGrass("Газонная трава", "Элитная трава для газона", 500.0, 20, "Россия", "7 дней", "Зеленый")
-    # grass2 = LawnGrass("Газонная трава 2", "Выносливая трава", 450.0, 15, "США", "5 дней", "Темно-зеленый")
-    # smartphone1 = Smartphone(
-    #     "Samsung Galaxy S23 Ultra",
-    #     "256GB, Серый цвет, 200MP камера",
-    #     180000.0,
-    #     5, 95.5,
-    #     "S23 Ultra",
-    #     256,
-    #     "Серый"
-    # )
-    # smartphone2 = Smartphone("Iphone 15",
-    #                          "512GB, Gray space",
-    #                          210000.0,
-    #                          8,
-    #                          98.2,
-    #                          "15",
-    #                          512,
-    #                          "Gray space")
-    #
-    #
-    # prod_dict = {
-    #     "name": "Samsung Galaxy C23 Ultra",
-    #     "description": "256GB, Серый цвет, 200MP камера",
-    #     "price": 210000.0,
-    #     "quantity": 5
-    # }
-    #
-    # prod_list1 = [product1, product2]
-    # prod_list2 = [smartphone1, smartphone2]
-    # print(prod_list1)
-    # print(prod_list2)
-    #
-    # total = product1 + product2
-    # print(total)
-    # total2 = grass1 + grass2
-    # print(total2)
-    # total3 = smartphone1 + smartphone2
-    # print(total3)
-    # print(product2.price)
-    # print(smartphone1.price)
-    # print(grass1.price)
-    # print(product2)
-    # print(smartphone1)
-    # print(grass1)
-    # print(Product.new_product(prod_dict, prod_list1))
-    # print(Smartphone.new_product(prod_dict, prod_list2))# необходимо заново переопределить в дочерних классах
+#     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+#     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+#     # product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+#     # grass1 = LawnGrass("Газонная трава", "Элитная трава для газона", 500.0, 20, "Россия", "7 дней", "Зеленый")
+#     # grass2 = LawnGrass("Газонная трава 2", "Выносливая трава", 450.0, 15, "США", "5 дней", "Темно-зеленый")
+#     smartphone1 = Smartphone(
+#         "Samsung Galaxy S23 Ultra",
+#         "256GB, Серый цвет, 200MP камера",
+#         180000.0,
+#         5, 95.5,
+#         "S23 Ultra",
+#         256,
+#         "Серый"
+#     )
+#     smartphone2 = Smartphone("Iphone 15",
+#                              "512GB, Gray space",
+#                              210000.0,
+#                              8,
+#                              98.2,
+#                              "15",
+#                              512,
+#                              "Gray space")
+#
+#
+#     prod_dict = {
+#         "name": "Samsung Galaxy C23 Ultra",
+#         "description": "256GB, Серый цвет, 200MP камера",
+#         "price": 210000.0,
+#         "quantity": 5
+#     }
+#
+# prod_list1 = [product1, product2]
+# prod_list2 = [smartphone1, smartphone2]
+# print(prod_list1)
+# print(prod_list2)
+#
+# total = product1 + product2
+# print(total)
+# total2 = grass1 + grass2
+# print(total2)
+# total3 = smartphone1 + smartphone2
+# print(total3)
+# print(product2.price)
+# print(smartphone1.price)
+# print(grass1.price)
+# print(product2)
+# print(smartphone1)
+# print(grass1)
+# print(Product.new_product(prod_dict, prod_list1))
+# print(Smartphone.new_product(prod_dict, prod_list2))# необходимо заново переопределить в дочерних классах
 
-#проверка итератора -------------------------
-    # category = Category(
-    #     "Смартфоны",
-    #     "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-    #     [product1, product2, product3],
-    # )
-    #
-    # iterator = Iterator(category)
-    #
-    # for product in iterator:
-    #     print(product)
-#---------------------------------------------
+# проверка итератора -------------------------
+# category = Category(
+#     "Смартфоны",
+#     "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+#     [product1, product2],
+# )
 
-    # product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-    # total = Order(product1, 10)
-    # print(total)
+# print(category.middle_price())
+
+# iterator = Iterator(category)
+#
+# for product in iterator:
+#     print(product)
+# ---------------------------------------------
+
+# product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+# total = Order(product1, 0)
+# print(total)

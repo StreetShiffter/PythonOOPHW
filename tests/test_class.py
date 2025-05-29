@@ -1,7 +1,9 @@
 from unittest.mock import patch
+
 import pytest
-import unittest
-from src.class_module import Category, Iterator, LawnGrass, Product, Smartphone, Order
+
+from src.class_module import Category, Iterator, LawnGrass, Order, Product, Smartphone
+
 
 def test_product_correct(product_item: Product) -> None:
     """Тест корректных значений продукта."""
@@ -52,9 +54,7 @@ def test_add_product_increases_count(category_item: Category) -> None:
 def test_add_product_correctly_adds(category_item: Category) -> None:
     """Тест, что add_product корректно добавляет продукт"""
     new_product = Product("Смартфон", "Android", 80000, 10)
-
     category_item.add_product(new_product)
-
     assert category_item._Category__products[-1] == new_product  # type: ignore
 
 
@@ -122,33 +122,20 @@ def test_add_method() -> None:
 
 
 def test_init_rise() -> None:
-        product = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
-        with pytest.raises(TypeError):
-            Category("Смартфоны", "Высокопроизводительные смартфоны", [product, 321])
+    product = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    with pytest.raises(TypeError):
+        Category("Смартфоны", "Высокопроизводительные смартфоны", [product, 321])
 
 
 def test_add_product_raises_error_when_adding_wrong_type():
     # Создаём начальный продукт
-    smartphone = Smartphone("iPhone",
-                            "Смартфон Apple",
-                            100000.0,
-                            10,
-                            11,
-                            "15 Pro",
-                            8,
-                            "grey")
+    smartphone = Smartphone("iPhone", "Смартфон Apple", 100000.0, 10, 11, "15 Pro", 8, "grey")
 
     # Создаём категорию с ним
     category = Category("Смартфоны", "Высокопроизводительные смартфоны", [smartphone])
 
     # Пробуем добавить продукт другого типа
-    trava = LawnGrass("Красная кружка",
-                      "Удобная кружка для кофе",
-                      500.0,
-                      100,
-                      "Russia",
-                      "1 week",
-                      "Green")
+    trava = LawnGrass("Красная кружка", "Удобная кружка для кофе", 500.0, 100, "Russia", "1 week", "Green")
 
     # Ожидаем TypeError
     with pytest.raises(TypeError) as exc_info:
@@ -361,23 +348,38 @@ def test_price_with_confirmation__not_approved(mock_input) -> None:
     # Проверяем, что цена действительно изменилась
     assert product.price != new_price
 
+
 def test_order_valid(product_item: Product) -> None:
     """Тест класса заказа при валидных данных"""
     total_order = Order(product_item, 20)
     assert total_order
 
+
 def test_order_str() -> None:
     """Тест класса заказа при валидных данных и вывод строки в консоль"""
     product = Product("Телевизор", "4K телевизор", 30000.0, 10)
     order = Order(product=product, quantity=2)
-    expected_str = 'Телевизор, 30000.0 руб. Остаток: 10 шт., 2, 60000.0'
+    expected_str = "Телевизор, 30000.0 руб. Остаток: 10 шт., 2, 60000.0"
     assert str(order) == expected_str
 
-def test_order_invalid(product_item: Product) -> None:
-    """Тест класса заказа при невалидных данных"""
-    with pytest.raises(ValueError) as text_error:
-        total_order = Order(product_item, 25)
-        assert text_error == total_order
+
+def test_order_invalid_quantity_zero(product_item: Product, capsys) -> None:
+    """Тест класса заказа при невалидных данных (нулевое количество) и вывод строки в консоль"""
+    order = Order(product_item, 0)  # Проверяем значение total_price
+    assert order.total_price == 0  # Проверяем вывод в консоль
+    captured = capsys.readouterr()
+    assert "Ошибка: Количество товара должно быть больше нуля" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+
+
+def test_order_invalid_quantity(product_item: Product, capsys) -> None:
+    """Тест класса заказа при невалидных данных (превышающее количество) и вывод строки в консоль"""
+    order = Order(product_item, 25)
+    assert order.total_price == 0
+    captured = capsys.readouterr()
+    assert "Вызвана ошибка: Количество заказа превышает количество на складе" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+
 
 def test_products_info(sample_category) -> None:
     """Проверка вывода информации категории"""
@@ -395,22 +397,70 @@ def test_str_method_category(sample_category) -> None:
     assert str(sample_category) == expected
 
 
-def test_len_method_category(sample_category):
+def test_len_method_category(sample_category) -> None:
     """Проверка вывода информации длины категории"""
     assert len(sample_category) == 3
+
 
 def test_product_check_list(sample_category, capsys) -> None:
     """
     Проверяет, что метод product_check_list() корректно выводит типы продуктов.
     """
-    expected_output = (
-        "[Обычный товар] Телевизор\n"
-        "[Смартфон] iPhone 15\n"
-        "[Газонная трава] Газонная трава Элит\n"
-    )
+    expected_output = "[Обычный товар] Телевизор\n" "[Смартфон] iPhone 15\n" "[Газонная трава] Газонная трава Элит\n"
 
     sample_category.product_check_list()
 
     # Получаем вывод stdout
     captured = capsys.readouterr()
     assert captured.out == expected_output
+
+
+# Новые тесты 17.1
+def test_raise_product() -> None:
+    """Проверка исключения продукта с нулевым количеством"""
+    with pytest.raises(
+        ValueError,
+        match="Возникла ошибка ValueError прерывающая работу программы при попытке добавить продукт с нулевым количеством",
+    ):
+        assert Product("Samsung s20", "Смартфон корейский", 80000, 0)
+
+
+def test_raise_custom_except(capsys) -> None:
+    """Проверка исключения категории продукта с нулевым количеством"""
+    result = Category("Samsung s20", "Смартфон корейский", [])
+    assert result is not None
+    captured = capsys.readouterr()
+    assert "Вызвана ошибка: Передан пустой список" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+
+
+def test_middle_prise_except_custom(capsys) -> None:
+    """Проверка кастомного исключения категории продукта"""
+    result = Category("Samsung s20", "Смартфон корейский", [])
+    assert result.middle_price() is not None
+    captured = capsys.readouterr()
+    assert "Вызвана ошибка: Передан пустой список" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+    assert "Ошибка: Список товаров пуст" in captured.out
+    assert "Операция завершена" in captured.out
+
+
+def test_middle_prise_rise(capsys) -> None:
+    """Проверка исключения категории продукта с нулевой ценой"""
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 0, 5)
+    result = Category("Samsung s20", "Смартфон корейский", [product1, product2])
+    assert result.middle_price() is None
+    captured = capsys.readouterr()
+    assert "Товар добавлен" in captured.out
+    assert "Обработка добавления товара завершена" in captured.out
+    assert "На ноль делить нельзя" in captured.out
+    assert "Операция завершена" in captured.out
+
+
+def test_middle_prise_correct() -> None:
+    """Проверка штатной отработки кода"""
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 90000, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 180000, 5)
+    result = Category("Samsung s20", "Смартфон корейский", [product1, product2])
+    assert result.middle_price()
